@@ -93,14 +93,40 @@ void Manual() {
 // menu das configuracoes
 void configuracoes() {
     system(CLEAR);
-    printf("\033[0;36m\n\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
-    printf("        \033[0;36mCONFIGURACOES\033[0m\n");
-    printf("\033[0;36m=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
-    printf("O que deseja fazer?\n");
-    printf("1 - Zerar Ranking.\n");
-    printf("2 - Modo Blind.\n");
-    printf("3 - Editor de fases.\n");
-    printf("4 - Voltar ao menu principal.\n");
+    int opcao;
+    while (1) {
+        system(CLEAR);
+        printf("\033[0;36m\n\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
+        printf("        \033[0;36mCONFIGURACOES\033[0m\n");
+        printf("\033[0;36m=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
+        printf("O que deseja fazer?\n");
+        printf("1 - Zerar Ranking.\n");
+        printf("2 - Modo Blind.\n");
+        printf("3 - Editor de fases.\n");
+        printf("4 - Voltar ao menu principal.\n");
+
+        scanf("%d", &opcao);
+        getchar(); 
+        switch (opcao) {
+            case 1: ZerarRanking(); break;
+            case 2: break;
+            case 3: break;
+            case 4: break;
+            default:
+                printf("Opcao invalida. Pressione Enter para continuar.\n");
+                getchar();
+                break;
+        }
+    }
+}
+
+void ZerarRanking() {
+    FILE *arquivo = fopen("ranking.bin", "wb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo!\n");
+    } else {
+        fclose(arquivo); 
+    }
 }
 
 // checagem para saber se o jogo chegou ao fim, ou seja, se todas as colunas estão preenchidas
@@ -352,7 +378,7 @@ int main() {
         fwrite(nickname, sizeof(char), MAX_NICK, ranking);
         fwrite(pontuacao, sizeof(int), 1, ranking);
     }
-    
+
     menu();
 
     return 0;
