@@ -14,15 +14,35 @@ char MATRIZPRINCIPAL[10][10];
 
 // definir a quantidade de caracteres que o nickname pode ter 
 #define MAX_NICK 100
+#define MAX_JOGADORES 1000
 
+// guarda a posição do ponteiro no arquivo de ENTRADA
 long MUDARFASE = -1;
 
+// guarda a QUANTIDADE DE FASES
 int FASE = 0;
 
+// MAIOR COLUNA = MAIOR COLUNA DO ARQUIVO DE ENTRADA
 int MAIORCOLUNA = 0;
+// ColunaAtual = quantidade de colunas lidas no arquivo de entrada
 int ColunaAtual = 0;
 
+// guarda a informação de ativação do MODOBLIND
 int MODOBLIND = 0;
+
+// guarda a informação se o arquivo entrada já foi LIDO ATÉ O FINAL
+int FINALDEJOGO = 0;
+
+// nickname de quem está jogando no momento e sua pontuação
+char nickname[MAX_NICK];
+int pontuacao = 0;
+
+//struct para ORDENAR o RANKING
+typedef struct {
+    char nick[MAX_NICK];
+    int pontos;
+} Jogador;
+
 /*para mostrar que as funções existem e não dar conflito*/
 void menu();
 void configuracoes();
@@ -38,29 +58,29 @@ void inicializarmatriz() {
 }
 
 int sair() {
-    printf("\nSaindo do jogo...\n");
+    printf("\n     Saindo do jogo...\n");
     exit(0);
     return 1;
 }
 
 void Manual() {
     system(CLEAR);
-    printf("\033[0;36m\n\n\n*   *   *   *   *   *   *   *   *   *\033[0m\n\n");
-    printf("\033[0;36m  *   *   *   *   *   *   *   *   *   *\033[0m\n\n");
-    printf("Esse jogo é inspirado no ");
-    printf("\033[0;36mBall Sort\033[0m");
-    printf(" da franquia Guru Games!\n\n");
-    printf("O jogo consiste em colunas com caracteres embaralhados que precisa da SUA ajuda para serem organizados!\n\n");
-    printf("\033[0;36mE como organizá-los?\033[0m\n\n");
-    printf("Você precisa digitar a coluna de onde quer retirá-los e a coluna onde eles vão parar.\n\n");
-    printf("Mas tem algo IMPORTANTE! Os movimentos só podem acontecer se o caractere movido\n");
-    printf("e o último caractere da coluna de destino forem IGUAIS!\n\n");
-    printf("Além disso a coluna de destino precisa ter ESPAÇO DISPONÍVEL!\n\n");
-    printf("Você vence o jogo se conseguir organizar TODAS as colunas,\n");
-    printf("de modo que o conteúdo delas seja SÓ de caracteres IGUAIS\n");
-    printf("ao da linha subsequente na MESMA COLUNA!\n\n");
-    printf("\033[0;36mBoa Sorte!\033[0m\n\n");
-    printf("Digite <enter> para voltar ao MENU! ");
+    printf("\033[0;36m\n\n\n     *   *   *   *   *   *   *   *   *   *\033[0m\n\n");
+    printf("\033[0;36m       *   *   *   *   *   *   *   *   *   *\033[0m\n\n");
+    printf("     Esse jogo é inspirado no ");
+    printf("\033[0;36m     Ball Sort\033[0m");
+    printf("      da franquia Guru Games!\n\n");
+    printf("     O jogo consiste em colunas com caracteres embaralhados que precisa da SUA ajuda para serem organizados!\n\n");
+    printf("\033[0;36m     E como organizá-los?\033[0m\n\n");
+    printf("     Você precisa digitar a coluna de onde quer retirá-los e a coluna onde eles vão parar.\n\n");
+    printf("     Mas tem algo IMPORTANTE! Os movimentos só podem acontecer se o caractere movido\n");
+    printf("     e o último caractere da coluna de destino forem IGUAIS!\n\n");
+    printf("     Além disso a coluna de destino precisa ter ESPAÇO DISPONÍVEL!\n\n");
+    printf("     Você vence o jogo se conseguir organizar TODAS as colunas,\n");
+    printf("     de modo que o conteúdo delas seja SÓ de caracteres IGUAIS\n");
+    printf("     ao da linha subsequente na MESMA COLUNA!\n\n");
+    printf("\033[0;36m     Boa Sorte!\033[0m\n\n");
+    printf("     Digite <enter> para voltar ao MENU! ");
     getchar();
 }
 
@@ -123,11 +143,12 @@ int checagemColuna(int tam, int Coluna) {
 void printarmatriz(int tam, int colunas) {
     printf("\n\n\n");
     if (MODOBLIND) {
+        int printed[10] = {0}; 
+        char primeiroChar[10];
         for (int i = 10-tam; i <= 11; i++) {
             if (i == 11) {
                 printf("\n");
             }
-            int printed = 0;
             for (int j = 0; j < colunas; j++) {
                 if (i == 10 && j > 0) {
                     printf("\033[0;36m=-=-= \033[0m");
@@ -148,9 +169,14 @@ void printarmatriz(int tam, int colunas) {
                     else {
                         printf("\033[0;36m| \033[0m");
                     }
-                    if (MATRIZPRINCIPAL[i][j] != '0' && MATRIZPRINCIPAL[i][j] != 'X' && !printed) {
-                        printf("%c", MATRIZPRINCIPAL[i][j]);
-                        printed++;
+                    char atual = MATRIZPRINCIPAL[i][j];
+                    if (atual != '0' && atual != 'X' && !printed[j]) {
+                        printf("%c", atual);
+                        primeiroChar[j] = atual;
+                        printed[j] = 1;
+                    }
+                    else if (printed[j] && atual == primeiroChar[j] && MATRIZPRINCIPAL[i-1][j] == primeiroChar[j]) {
+                        printf("%c", atual);
                     }
                     else {
                         printf(" ");
@@ -269,12 +295,61 @@ void PreencherMatriz() {
         }
         ColunaAtual++;
     }
-    printf("ESSA EH A MAIORCOLUNA %d\n", MAIORCOLUNA);
+    if (feof(entrada)) {
+        FINALDEJOGO = 1;
+    }
     fclose(entrada);
 }
 
+// ordenar o ranking depois que a fase terminou
+void OrdenarRanking(char nickname[MAX_NICK], int novaPontuacao) {
+    FILE *ranking = fopen("ranking.bin", "rb");
+    Jogador jogadores[MAX_JOGADORES];
+    int total = 0;
+    int encontrou = 0;
+    if (ranking) {
+        while (fread(&jogadores[total], sizeof(Jogador), 1, ranking) == 1 && total < MAX_JOGADORES) {
+            if (strcmp(jogadores[total].nick, nickname) == 0) {
+                jogadores[total].pontos += novaPontuacao;
+                encontrou = 1;
+            }
+            total++;
+        }
+        fclose(ranking);
+    }
+    if (!encontrou && total < MAX_JOGADORES) {
+        strcpy(jogadores[total].nick, nickname);
+        jogadores[total].pontos = novaPontuacao;
+        total++;
+    }
+    for (int i = 0; i < total - 1; i++) {
+        for (int j = i + 1; j < total; j++) {
+            if (jogadores[j].pontos > jogadores[i].pontos) {
+                Jogador temp = jogadores[i];
+                jogadores[i] = jogadores[j];
+                jogadores[j] = temp;
+            }
+        }
+    }
+    FILE *temp = fopen("temp.bin", "wb");
+    if (!temp) {
+        printf("Erro ao criar arquivo temporário!\n");
+        return;
+    }
+    fwrite(jogadores, sizeof(Jogador), total, temp);
+    fclose(temp);
+    remove("ranking.bin");
+    rename("temp.bin", "ranking.bin");
+}
+
+void terminouFase() {
+    OrdenarRanking(nickname, pontuacao);
+    menu();
+}
 // MOSTRAR O RANKING NA TELA
 void Ranking() {
+    OrdenarRanking(nickname, pontuacao);
+    
     system(CLEAR);
 
     FILE *ranking;
@@ -297,7 +372,7 @@ void Ranking() {
         fread(&pontuacaoexistente, sizeof(int), 1, ranking);
         printf("     %-10d", pos);
         printf("%-20s", nickexistente);
-        printf("%-10d", pontuacaoexistente);
+        printf("%-10d\n", pontuacaoexistente);
         pos++;
     }
     printf("\n\n\n     Digite <enter> para voltar ao MENU! ");
@@ -389,15 +464,39 @@ void MAINLOOP() {
             while (getchar() != '\n');
             getchar();
         }
-        else if (terminarFase) {
+        else if (terminarFase && FINALDEJOGO) {
+            system(CLEAR);
+            printf("\033[0;36m\n\n\n\n*  .       *      . *     *     *  *       .   *   * *     *  *      . *   * *\n\n\033[0m");
+            printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *\n\n\033[0m");
+            printf("     Parabéns! Você completou ");
+            printf("\033[0;36mTODAS033[0m");
+            printf(" as fases!\n\n");
+            printf("\033[0;36m*  .       *      . *     *     *  *       .   *   * *     *  *      . *   * *033[0m\n\n");
+            printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *033[0m\n\n");
+            pontuacao+=MAIORCOLUNA;
+            MAIORCOLUNA = 0;
+            printf("\n     Digite <enter> para continuar! ");
+            while (getchar() != '\n');
+            getchar();
+            terminouFase();
+        }
+        else if (terminarFase && !FINALDEJOGO) {
             system(CLEAR);
             printf("\033[0;36m\n\n\n\n*  .       *      . *     *     *  *       .   *   * *     *  *      . *   * *\n\n\033[0m");
             printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *\n\n\033[0m");
             printf("     Parabéns! Você completou a ");
             printf("\033[0;36mFASE %d!\n\n\033[0m\n\n", FASE);
-            printf("     Digite <enter> para continuar! ");
-            while (getchar() != '\n');
-            getchar();
+            printf("\033[0;36m     Digite 1 para continuar!033[0m\n");
+            printf("\033[0;36m     Digite 2 para parar!033[0m\n");
+            printf("     ");
+            pontuacao+=MAIORCOLUNA;
+            int opcao;
+            scanf("%d", &opcao);
+            if (opcao == 2) {
+                MAIORCOLUNA = 0;
+                terminouFase();
+            }
+            MAIORCOLUNA = 0;
             PreencherMatriz();
             FASE++;
         }
@@ -490,8 +589,7 @@ void menu() {
 // SEGUNDO LOOP PRINCIPAL DO JOGO, determina o funcionamento geral
 int main() {
     FILE *ranking;
-    char nickname[MAX_NICK];
-    int pontuacao = 0;
+    memset(nickname, '\0', sizeof(nickname));
 
     ranking = fopen("ranking.bin", "rb+");
 
