@@ -376,7 +376,8 @@ void Ranking() {
         printf("%-10d\n", pontuacaoexistente);
         pos++;
     }
-    printf("\n\n\n     Digite <enter> para voltar ao MENU! ");
+    printf("\033[0;36m\n\n\n     Ranking atualizado ao fechar o programa!\033[0m\n\n");
+    printf("     Digite <enter> para voltar ao MENU! ");
     getchar();
 }
 
