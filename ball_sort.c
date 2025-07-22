@@ -611,7 +611,7 @@ void EditorFase() {
     printf("     Ele te permite criar fases novas para o jogo!\n");
     printf("     Porém, ele possui algumas REGRAS!\n");
     printf("\n     1 - Só crie uma fase se cada caractere que você adicionar aparecer em quantidade menor ou igual das colunas!\n\n");
-    printf("\n     2 - A responsabilidade é sua para criar fases que \033[0;36mPOSSUAM SOLUÇÃO\033[0m\n\n.");
+    printf("\n     2 - A responsabilidade é sua para criar fases que \033[0;36mPOSSUAM SOLUÇÃO\033[0m.\n\n");
     printf("\033[0;32m\n     Se deseja continuar - APERTE 1!\n\033[0m");
     printf("\033[0;31m\n     Se deseja voltar - APERTE 2!\n\n\033[0m");
     printf("     Digite sua opção: ");
