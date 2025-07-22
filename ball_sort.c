@@ -17,48 +17,19 @@ char MATRIZPRINCIPAL[10][10];
 
 long MUDARFASE = -1;
 
-int MAIORCOLUNA;
+int MAIORCOLUNA = 0;
 int ColunaAtual = 0;
+
+/*para mostrar que as funções existem e não dar conflito*/
+void menu();
+void configuracoes();
 
 /* função com o objetivo de inicializar a matriz do jogo, e tornar mais fácil a distinção
 de colunas preenchidas */
-void inicializarmatriz(char MATRIZPRINCIPAL[][10]) {
+void inicializarmatriz() {
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
             MATRIZPRINCIPAL[i][j] = '0';
-        }
-    }
-}
-
-// menu principal do jogo
-void menu() {
-    system(CLEAR);
-    int opcao;
-
-    while (1) {
-        system(CLEAR);
-        printf("\033[0;36m\n\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
-        printf("        \033[0;36mJOGO BALL SORT!\033[0m\n");
-        printf("\033[0;36m=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
-        printf("O que deseja fazer?\n");
-        printf("1 - Jogar.\n");
-        printf("2 - Ranking.\n");
-        printf("3 - Manual.\n");
-        printf("4 - Configuracoes.\n");
-        printf("5 - Sair.\n");
-
-        scanf("%d", &opcao);
-        getchar(); 
-        switch (opcao) {
-            case 1: MAINLOOP(); break;
-            case 2: Ranking(); break;
-            case 3: Manual(); break;
-            case 4: configuracoes(); break;
-            case 5: sair(); return;
-            default:
-                printf("Opcao invalida. Pressione Enter para continuar.\n");
-                getchar();
-                break;
         }
     }
 }
@@ -90,36 +61,6 @@ void Manual() {
     getchar();
 }
 
-// menu das configuracoes
-void configuracoes() {
-    system(CLEAR);
-    int opcao;
-    while (1) {
-        system(CLEAR);
-        printf("\033[0;36m\n\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
-        printf("        \033[0;36mCONFIGURACOES\033[0m\n");
-        printf("\033[0;36m=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
-        printf("O que deseja fazer?\n");
-        printf("1 - Zerar Ranking.\n");
-        printf("2 - Modo Blind.\n");
-        printf("3 - Editor de fases.\n");
-        printf("4 - Voltar ao menu principal.\n");
-
-        scanf("%d", &opcao);
-        getchar(); 
-        switch (opcao) {
-            case 1: ZerarRanking(); break;
-            case 2: break;
-            case 3: break;
-            case 4: break;
-            default:
-                printf("Opcao invalida. Pressione Enter para continuar.\n");
-                getchar();
-                break;
-        }
-    }
-}
-
 void ZerarRanking() {
     FILE *arquivo = fopen("ranking.bin", "wb");
     if (arquivo == NULL) {
@@ -130,12 +71,12 @@ void ZerarRanking() {
 }
 
 // checagem para saber se o jogo chegou ao fim, ou seja, se todas as colunas estão preenchidas
-int checagem(char M[][10]) {
+int checagem() {
     int veredito = 1;
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
-            if (M[j][i] != '0') {
-                if (M[j][i] != M[j+1][i]) {
+            if (MATRIZPRINCIPAL[j][i] != '0') {
+                if (MATRIZPRINCIPAL[j][i] != MATRIZPRINCIPAL[j+1][i]) {
                     veredito = 0;
                 }
             }
@@ -150,7 +91,7 @@ int checagem(char M[][10]) {
 }
 
 // printar a matriz, incluindo uma simulação do frasco de vidro 
-void printarmatriz(char M[][10], int tam, int colunas) {
+void printarmatriz(char MATRIZPRINCIPAL[][10], int tam, int colunas) {
     for (int i = 10-tam; i <= 11; i++) {
         if (i == 11) {
             printf("\n");
@@ -164,11 +105,11 @@ void printarmatriz(char M[][10], int tam, int colunas) {
             }
             else {
                 printf("\033[0;36m| \033[0m");
-                if (M[i][j] == '0' || M[i][j] == 'X') {
+                if (MATRIZPRINCIPAL[i][j] == '0' || MATRIZPRINCIPAL[i][j] == 'X') {
                     printf(" ");
                 }
                 else {
-                    printf("%c", M[i][j]);
+                    printf("%c", MATRIZPRINCIPAL[i][j]);
                 }
                 if (j < colunas-1) {
                     printf("\033[0;36m | \033[0m");
@@ -187,7 +128,8 @@ void printarmatriz(char M[][10], int tam, int colunas) {
 
 // função com o objetivo de preencher a matriz principal e tornar mais fácil a manipulação durante o jogo
 void PreencherMatriz() {
-    FD *entrada;
+    inicializarmatriz();
+    FILE *entrada;
     
     entrada = fopen("entrada.txt", "r");
 
@@ -200,17 +142,17 @@ void PreencherMatriz() {
     int TamColuna;
     char caractereEntrada[2];
 
-    while (fread(caractereEntrada, sizeof(char), 1, entrada) != EOF) {
-        if (caractereEntrada == '-') {
+    while (fscanf(entrada, " %c", caractereEntrada) != EOF) {
+        if (caractereEntrada[0] == '-') {
             MUDARFASE = ftell(entrada);
             break;
         }
 
         if (caractereEntrada[0] >= 48 && caractereEntrada[0] <= 57) {
             char SegundoDigito[1]; // caso o caractere for um 10
-            fread(SegundoDigito, sizeof(char), 1, entrada);
+            fscanf(entrada, " %c", SegundoDigito);
 
-            if (segundoDigito[0] >= 48 && segundoDigito[0] <= 57) {
+            if (SegundoDigito[0] >= 48 && SegundoDigito[0] <= 57) {
                 TamColuna = 10;
             } else {
                 TamColuna = caractereEntrada[0] - 48;
@@ -225,12 +167,12 @@ void PreencherMatriz() {
 
         if (TamColuna == 0) {
             for (int j = 0; j < 10; j++) {
-                M[j][ColunaAtual - 1] = 'X';
+                MATRIZPRINCIPAL[j][ColunaAtual - 1] = 'X';
             }
         } else {
             for (int j = 10 - TamColuna; j < 10; j++) {
-                fread(caractereEntrada, sizeof(char), 1, entrada);
-                M[j][ColunaAtual - 1] = caractereEntrada[0];
+                fscanf(entrada, " %c", caractereEntrada);
+                MATRIZPRINCIPAL[j][ColunaAtual - 1] = caractereEntrada[0];
             }
         }
     }
@@ -268,6 +210,12 @@ void Ranking() {
 
 // LOOP PRINCIPAL DO JOGO, determina o funcionamento da opção de JOGAR
 void MAINLOOP() {
+    for(int i = 0; i < 10; i++) {
+        for(int j = 0; j < 10; j++) {
+            printf("%c ", &MATRIZPRINCIPAL[i][j]);
+        }
+        printf("\n");
+    }
     while (1) {
         system(CLEAR);
         int Movimento = 1;
@@ -284,12 +232,12 @@ void MAINLOOP() {
         int flag = 0, linhaInicio, MaxTransferidos = 0;
         char aux;
         for (int i = MAIORCOLUNA; i < 10; i++) {
-            if (M[i][posInicial] != '0' && flag == 0) {
-                aux = M[i][posInicial];
+            if (MATRIZPRINCIPAL[i][posInicial] != '0' && flag == 0) {
+                aux = MATRIZPRINCIPAL[i][posInicial];
                 linhaInicio = i;
                 flag++;
                 MaxTransferidos++;
-            } else if (M[i][posInicial] == aux) {
+            } else if (MATRIZPRINCIPAL[i][posInicial] == aux) {
                 MaxTransferidos++;
             }
         }
@@ -298,11 +246,11 @@ void MAINLOOP() {
         // checa quantos espaços estão disponíveis na coluna de destino
         int espacoDisponivel = 0, linhaFinal;
         for (int i = 10-MAIORCOLUNA-1; i < 10; i++) { // exemplo, se a maior coluna for 3, ele começa no 10-3-1, ou seja, no 6+3 = 9, o máximo índice é 9
-            if (M[i][posFinal] == '0') {
+            if (MATRIZPRINCIPAL[i][posFinal] == '0') {
                 espacoDisponivel++;
             } else {
                 linhaFinal = i;
-                if (M[i][posFinal] == aux) {
+                if (MATRIZPRINCIPAL[i][posFinal] == aux) {
                     printf("Esse movimento foi autorizado!\n");
                 }
                 else {
@@ -324,20 +272,80 @@ void MAINLOOP() {
 
         // checar se o movimento pode ocorrer
         for (int i = linhaFinal-Tranferencia; i <= linhaFinal; i++) {
-            if (M[i][posFinal] == '0') {
-                M[i-1][posFinal] = aux;
-                M[linhaInicio][posInicial] = '0';
+            if (MATRIZPRINCIPAL[i][posFinal] == '0') {
+                MATRIZPRINCIPAL[i-1][posFinal] = aux;
+                MATRIZPRINCIPAL[linhaInicio][posInicial] = '0';
             }
             linhaInicio++;
         }
     }
 }
 
+// menu das configuracoes
+void configuracoes() {
+    system(CLEAR);
+    int opcao;
+    while (1) {
+        system(CLEAR);
+        printf("\033[0;36m\n\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
+        printf("        \033[0;36mCONFIGURACOES\033[0m\n");
+        printf("\033[0;36m=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
+        printf("O que deseja fazer?\n");
+        printf("1 - Zerar Ranking.\n");
+        printf("2 - Modo Blind.\n");
+        printf("3 - Editor de fases.\n");
+        printf("4 - Voltar ao menu principal.\n");
+
+        scanf("%d", &opcao);
+        getchar(); 
+        switch (opcao) {
+            case 1: ZerarRanking(); break;
+            case 2: break;
+            case 3: break;
+            case 4: menu();
+            default:
+                printf("Opcao invalida. Pressione Enter para continuar.\n");
+                getchar();
+                break;
+        }
+    }
+}
+
+// menu principal do jogo
+void menu() {
+    system(CLEAR);
+    int opcao;
+
+    while (1) {
+        system(CLEAR);
+        printf("\033[0;36m\n\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
+        printf("        \033[0;36mJOGO BALL SORT!\033[0m\n");
+        printf("\033[0;36m=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
+        printf("O que deseja fazer?\n");
+        printf("1 - Jogar.\n");
+        printf("2 - Ranking.\n");
+        printf("3 - Manual.\n");
+        printf("4 - Configuracoes.\n");
+        printf("5 - Sair.\n");
+
+        scanf("%d", &opcao);
+        getchar(); 
+        switch (opcao) {
+            case 1: MAINLOOP(MATRIZPRINCIPAL); break;
+            case 2: Ranking(); break;
+            case 3: Manual(); break;
+            case 4: configuracoes(); break;
+            case 5: sair(); return;
+            default:
+                printf("Opcao invalida. Pressione Enter para continuar.\n");
+                getchar();
+                break;
+        }
+    }
+}
+
 // SEGUNDO LOOP PRINCIPAL DO JOGO, determina o funcionamento geral
 int main() {
-    if (sair()) {
-        break;
-    }
     FILE *ranking;
     char nickname[MAX_NICK];
     int pontuacao = 0;
@@ -376,7 +384,7 @@ int main() {
     if (!usuarioexiste) {
         fseek(ranking, 0, SEEK_END);
         fwrite(nickname, sizeof(char), MAX_NICK, ranking);
-        fwrite(pontuacao, sizeof(int), 1, ranking);
+        fwrite(&pontuacao, sizeof(int), 1, ranking);
     }
 
     menu();
