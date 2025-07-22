@@ -417,7 +417,7 @@ void MAINLOOP() {
         for (int i = 10-MAIORCOLUNA; i < 10; i++) { // exemplo, se a maior coluna for 3, ele começa no 10-3-1, ou seja, no 6+3 = 9, o máximo índice é 9
             if (MATRIZPRINCIPAL[i][posFinal] == '0' || MATRIZPRINCIPAL[i][posFinal] == 'X') {
                 espacoDisponivel++;
-            } else {
+            } else if (espacoDisponivel) {
                 linhaFinal = i;
                 if (MATRIZPRINCIPAL[i][posFinal] == aux) {
                     printf("\033[0;32m\n     Esse movimento foi autorizado!\n\033[0m");
@@ -429,7 +429,11 @@ void MAINLOOP() {
                 break;
             }
         }
-        if (espacoDisponivel == MAIORCOLUNA) {
+        if (!espacoDisponivel) {
+            printf("\033[0;31m\n     Você não pode fazer esse movimento!\n\033[0m");
+            Movimento = 0;
+        }
+        else if (espacoDisponivel == MAIORCOLUNA) {
             printf("\033[0;32m\n     Esse movimento foi autorizado!\n\033[0m");
             linhaFinal = 10;
         }
@@ -466,6 +470,9 @@ void MAINLOOP() {
             getchar();
         }
         else if (terminarFase && FINALDEJOGO) {
+            printf("\n     Digite <enter> para continuar! ");
+            while (getchar() != '\n');
+            getchar();
             system(CLEAR);
             printf("\033[0;36m\n\n\n\n*  .       *      . *     *     *  *       .   *   * *     *  *      . *   * *\n\n\033[0m");
             printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *\n\n\033[0m");
@@ -482,6 +489,9 @@ void MAINLOOP() {
             terminouFase();
         }
         else if (terminarFase && !FINALDEJOGO) {
+            printf("\n     Digite <enter> para continuar! ");
+            while (getchar() != '\n');
+            getchar();
             system(CLEAR);
             printf("\033[0;36m\n\n\n\n*  .       *      . *     *     *  *       .   *   * *     *  *      . *   * *\n\n\033[0m");
             printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *\n\n\033[0m");
