@@ -68,8 +68,8 @@ void Manual() {
     printf("\033[0;36m\n\n\n     *   *   *   *   *   *   *   *   *   *\033[0m\n\n");
     printf("\033[0;36m       *   *   *   *   *   *   *   *   *   *\033[0m\n\n");
     printf("     Esse jogo é inspirado no ");
-    printf("\033[0;36m     Ball Sort\033[0m");
-    printf("      da franquia Guru Games!\n\n");
+    printf("\033[0;36mBall Sort\033[0m");
+    printf(" da franquia Guru Games!\n\n");
     printf("     O jogo consiste em colunas com caracteres embaralhados que precisa da SUA ajuda para serem organizados!\n\n");
     printf("\033[0;36m     E como organizá-los?\033[0m\n\n");
     printf("     Você precisa digitar a coluna de onde quer retirá-los e a coluna onde eles vão parar.\n\n");
@@ -297,6 +297,7 @@ void PreencherMatriz() {
     }
     if (feof(entrada)) {
         FINALDEJOGO = 1;
+        rewind(entrada);
     }
     fclose(entrada);
 }
@@ -471,8 +472,8 @@ void MAINLOOP() {
             printf("     Parabéns! Você completou ");
             printf("\033[0;36mTODAS033[0m");
             printf(" as fases!\n\n");
-            printf("\033[0;36m*  .       *      . *     *     *  *       .   *   * *     *  *      . *   * *033[0m\n\n");
-            printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *033[0m\n\n");
+            printf("\033[0;36m*  .       *      . *     *     *  *       .   *   * *     *  *      . *   * *\033[0m\n\n");
+            printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *\033[0m\n\n");
             pontuacao+=MAIORCOLUNA;
             MAIORCOLUNA = 0;
             printf("\n     Digite <enter> para continuar! ");
@@ -486,8 +487,8 @@ void MAINLOOP() {
             printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *\n\n\033[0m");
             printf("     Parabéns! Você completou a ");
             printf("\033[0;36mFASE %d!\n\n\033[0m\n\n", FASE);
-            printf("\033[0;36m     Digite 1 para continuar!033[0m\n");
-            printf("\033[0;36m     Digite 2 para parar!033[0m\n");
+            printf("\033[0;36m     Digite 1 para continuar!\033[0m\n");
+            printf("\033[0;36m     Digite 2 para parar!\033[0m\n");
             printf("     ");
             pontuacao+=MAIORCOLUNA;
             int opcao;
@@ -523,6 +524,94 @@ void Modoblind() {
     }
 }
 
+void EditarFases() {
+    FILE *entrada;
+    
+    entrada = fopen("entrada.txt", "a");
+
+    if (entrada == NULL) {
+        printf("Erro ao abrir o arquivo de entrada!\n");
+        return;
+    }
+    fprintf(entrada, "-\n");
+
+    while (1) {
+        system(CLEAR);
+        char temp;
+        char tamLinhas[2] = {'D', 'D'};
+        printf("\033[0;36m\n\n\n       *   *   *   *   *   *   *   *   *   *\033[0m\n\n");
+        printf("     Quando terminar de criar novas fases digite 'X'!\n");
+        printf("     Para coluna vazia digite '0'!\n");
+        printf("\n\n     Digite o tamanho da coluna! Ela deve obrigatoriamente ser menor ou igual a 10! ");
+        int tamCol = 0, tamValido = 0;
+        while (!tamValido) {
+            scanf("%s", tamLinhas);
+            if (tamLinhas[0] == 'X' || tamLinhas[0] == 'x') {
+                fprintf(entrada, "\n");
+                break;
+            }
+            else {
+                if (tamLinhas[0] == 49 && tamLinhas[0] != 'D') {
+                    tamCol = 10;
+                }
+                else {
+                    tamCol = tamLinhas[0]-48;
+                }
+                if (tamCol > 10 || tamCol < 0) {
+                    printf("     Digite um tamanho válido! ");
+                }
+                else {
+                    tamValido = 1;
+                }
+            }
+        }
+        if (tamLinhas[0] == 'X' || tamLinhas[0] == 'x') {
+            break;
+        }
+        if (tamLinhas[0] == '0') {
+            fprintf(entrada, "%c\n", '0');
+        }
+        else {
+            fprintf(entrada, "%c\n", tamCol+48);
+            printf("\n\n     Digite os %d caracteres da coluna (sem espaços): \n", tamCol);
+            for (int i = 0; i < tamCol; i++) {
+                char c;
+                printf("     Char %d: ", i+1);
+                scanf(" %c", &c);
+                fprintf(entrada, "%c\n", c);
+            }
+            printf("\033[0;36m     Coluna adicionada!\033[0m\n\n");
+        }
+        printf("\n     Digite <enter> para continuar! ");
+        while (getchar() != '\n');
+        getchar();
+    }
+    printf("     Saia do programa para atualizar o arquivo com suas novas fases!\n\n");
+    printf("\n     Digite <enter> para continuar! ");
+    while (getchar() != '\n');
+    getchar();
+    fclose(entrada);
+}
+
+void EditorFase() {
+    system(CLEAR);
+    printf("\033[0;36m\n\n\n     =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n");
+    printf("     \033[0;36m  O QUE É O EDITOR DE FASES?\033[0m\n");
+    printf("\033[0;36m     =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\033[0m\n\n");
+    printf("     Ele te permite criar fases novas para o jogo!\n");
+    printf("     Porém, ele possui algumas REGRAS!\n");
+    printf("\n     1 - Só crie uma fase se cada caractere que você adicionar aparecer em quantidade menor ou igual das colunas!\n\n");
+    printf("\n     2 - A responsabilidade é sua para criar fases que \033[0;36mPOSSUAM SOLUÇÃO\033[0m\n\n.");
+    printf("\033[0;32m\n     Se deseja continuar - APERTE 1!\n\033[0m");
+    printf("\033[0;31m\n     Se deseja voltar - APERTE 2!\n\n\033[0m");
+    printf("     Digite sua opção: ");
+    int opcao;
+    scanf("%d", &opcao);
+    if (opcao == 1) {
+        EditarFases();
+    }
+}
+
 // menu das configuracoes
 void configuracoes() {
     system(CLEAR);
@@ -543,7 +632,7 @@ void configuracoes() {
         switch (opcao) {
             case 1: ZerarRanking(); break;
             case 2: Modoblind(); break;
-            case 3: break;
+            case 3: EditorFase(); break;
             case 4: menu();
             default:
                 printf("Opcao invalida. Pressione Enter para continuar.\n");
