@@ -478,7 +478,7 @@ void MAINLOOP() {
             printf("\033[0;36m\n\n\n\n*  .       *      . *     *     *  *       .   *   * *     *  *      . *   * *\n\n\033[0m");
             printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *\n\n\033[0m");
             printf("     Parabéns! Você completou ");
-            printf("\033[0;36mTODAS033[0m");
+            printf("\033[0;36mTODAS\033[0m");
             printf(" as fases!\n\n");
             printf("\033[0;36m*  .       *      . *     *     *  *       .   *   * *     *  *      . *   * *\033[0m\n\n");
             printf("\033[0;36m       *       *  *  .   *     *  *       . *   *     *         .   *    .       *  *   * *\033[0m\n\n");
